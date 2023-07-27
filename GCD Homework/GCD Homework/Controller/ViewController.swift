@@ -12,38 +12,62 @@ final class ViewController: UIViewController {
     @IBOutlet private weak var searchBar: UISearchBar!
     
     var users: [User] = []
+    var tableViewUsers: [User] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        addUsers()
+        getUsers()
         
+        navigationController?.isNavigationBarHidden = true
         if let textfield = searchBar.value(forKey: "searchField") as? UITextField {
             textfield.backgroundColor = .systemBackground
         }
         tableView.dataSource = self
         tableView.register(UINib(nibName: "UserTableViewCell", bundle: nil), forCellReuseIdentifier: "UserTableViewCell")
+        searchBar.delegate = self
     }
     
-    // TODO: Mock data, will update after fetch API task
-    private func addUsers(){
-        users.append(User(avatarURL: "person", name: "Name1", account: "account1"))
-        users.append(User(avatarURL: "person", name: "Name2", account: "account2"))
-        users.append(User(avatarURL: "person", name: "Name3", account: "account3"))
-        users.append(User(avatarURL: "person", name: "Name4", account: "account4"))
-        users.append(User(avatarURL: "person", name: "Name5", account: "account5"))
+    private func getUsers(){
+        let url = Constant.getUserURL
+        APIManager.shared.performRequest(url: url, type: TotalUser.self) { [weak self] totalUser in
+            self?.users = totalUser.items
+            self?.tableViewUsers = totalUser.items
+            DispatchQueue.main.async { [weak self] in
+                self?.tableView.reloadData()
+            }
+        } failureHandler: {
+            print("Error fetching API")
+        }
     }
 }
 
 extension ViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return users.count
+        return tableViewUsers.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "UserTableViewCell") as? UserTableViewCell else {
             return UITableViewCell()
         }
-        cell.setUser(users[indexPath.row])
+        cell.setUser(tableViewUsers[indexPath.row])
         return cell
     }    
+}
+
+extension ViewController: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchText.isEmpty {
+            tableViewUsers = users
+        } else {
+            tableViewUsers = users.filter({ user in
+                user.name.contains(searchText)
+            })
+        }
+        tableView.reloadData()
+    }
 }

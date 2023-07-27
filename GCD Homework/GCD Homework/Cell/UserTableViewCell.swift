@@ -24,14 +24,13 @@ final class UserTableViewCell: UITableViewCell {
     
     private func configUI(){
         userBackgroundView.clipsToBounds = false
-
         userBackgroundView.layer.shadowColor = UIColor.black.cgColor
-        userBackgroundView.layer.cornerRadius = Constant.cornerRadiusBackgroundTableView
-        userBackgroundView.layer.shadowOpacity = Constant.shadowOpacityBackgroundTableView
-        userBackgroundView.layer.shadowOffset = Constant.shadowOffsetBackgroundTableView
-        userBackgroundView.layer.shadowRadius = Constant.shadowRadiusBackgroundTableView
+        userBackgroundView.layer.cornerRadius = Constant.UserTableViewCell.cornerRadiusBackground
+        userBackgroundView.layer.shadowOpacity = Constant.UserTableViewCell.shadowOpacityBackground
+        userBackgroundView.layer.shadowOffset = Constant.UserTableViewCell.shadowOffsetBackground
+        userBackgroundView.layer.shadowRadius = Constant.UserTableViewCell.shadowRadiusBackground
         
-        avatarImageView.layer.cornerRadius = Constant.cornerRadiusImageTableView
+        avatarImageView.layer.cornerRadius = Constant.UserTableViewCell.cornerRadiusImage
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -39,7 +38,9 @@ final class UserTableViewCell: UITableViewCell {
     }
     
     func setUser(_ user: User){
-        avatarImageView.image = UIImage(named: user.avatarURL)
+        APIManager.shared.getImage(url: user.avatarURL) { [weak self] image in
+            self?.avatarImageView.image = image
+        }
         nameLabel.text = user.name
         accountLabel.text = user.account
     }

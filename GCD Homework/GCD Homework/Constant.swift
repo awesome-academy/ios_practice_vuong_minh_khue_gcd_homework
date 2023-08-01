@@ -17,4 +17,11 @@ class Constant {
         static let shadowRadiusBackground: CGFloat = 4
         static let shadowOffsetBackground = CGSize(width: 0, height: 0)
     }
+    
+    struct DetailVC {
+        static let identifier = "DetailViewController"
+        static let cornerRadiusTab: CGFloat = 8
+        static let cornerRadiusImage: CGFloat = 50
+        static let cornerRadiusFavouriteButton: CGFloat = 30
+    }
 }

@@ -11,19 +11,19 @@ final class ViewController: UIViewController {
     @IBOutlet private weak var tableView: UITableView!
     @IBOutlet private weak var searchBar: UISearchBar!
     
-    var users: [User] = []
-    var tableViewUsers: [User] = []
+    private var users: [User] = []
+    private var tableViewUsers: [User] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
         getUsers()
         
-        navigationController?.isNavigationBarHidden = true
         if let textfield = searchBar.value(forKey: "searchField") as? UITextField {
             textfield.backgroundColor = .systemBackground
         }
         tableView.dataSource = self
-        tableView.register(UINib(nibName: "UserTableViewCell", bundle: nil), forCellReuseIdentifier: "UserTableViewCell")
+        tableView.delegate = self
+        tableView.register(UINib(nibName: UserTableViewCell.nibName, bundle: nil), forCellReuseIdentifier: UserTableViewCell.defaultReuseIdentifier)
         searchBar.delegate = self
     }
     
@@ -41,18 +41,27 @@ final class ViewController: UIViewController {
     }
 }
 
-extension ViewController: UITableViewDataSource {
+extension ViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return tableViewUsers.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "UserTableViewCell") as? UserTableViewCell else {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: UserTableViewCell.defaultReuseIdentifier) as? UserTableViewCell else {
             return UITableViewCell()
         }
         cell.setUser(tableViewUsers[indexPath.row])
         return cell
-    }    
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        guard let detailVC = storyboard?.instantiateViewController(withIdentifier: Constant.DetailVC.identifier) as? DetailViewController else {
+            return
+        }
+        detailVC.setUser(user: tableViewUsers[indexPath.row])
+        navigationController?.pushViewController(detailVC, animated: true)
+    }
 }
 
 extension ViewController: UISearchBarDelegate {
